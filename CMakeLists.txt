@@ -23,15 +23,22 @@ set(SOURCES1
     server.cpp
 )
 
+set(SOURCES2
+    timer_loop.cpp
+)
+
 
 # Create an executable target
 add_executable(client ${SOURCES} ${HEADERS})
 
 add_executable(server ${SOURCES1} ${HEADERS})
 
+add_executable(timer ${SOURCES2} ${HEADERS})
+
 # Set include directories
 target_include_directories(client PRIVATE ${Boost_INCLUDE_DIRS})
 target_include_directories(server PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(timer PRIVATE ${Boost_INCLUDE_DIRS})
 
 # Add additional compile options if needed
 # target_compile_options(MyExecutable PRIVATE -Wall -Wextra)
@@ -48,4 +55,5 @@ target_include_directories(server PRIVATE ${Boost_INCLUDE_DIRS})
 # target_link_directories(MyExecutable PRIVATE /path/to/external/lib)
  target_link_libraries(client PRIVATE ${Boost_LIBRARIES})
  target_link_libraries(server PRIVATE ${Boost_LIBRARIES})
+ target_link_libraries(timer PRIVATE ${Boost_LIBRARIES})
 
