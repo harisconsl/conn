@@ -1,6 +1,7 @@
 #ifndef _IN_COMMON_READ_WRITE_BUF_H_
 #define _IN_COMMON_READ_WRITE_BUF_H_
 #include "Macros.h"
+#include <string.h>
 
 namespace IN {
 namespace COMMON {
