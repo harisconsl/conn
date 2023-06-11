@@ -16,7 +16,7 @@ private:
   {
     std::shared_ptr<boost::asio::ip::tcp::socket> socket =
       std::make_shared<boost::asio::ip::tcp::socket>(acceptor_.get_executor());
-    
+
     // Initiate asynchronous accept operation
     acceptor_.async_accept(*socket,
 			   [this, socket](const boost::system::error_code& error) {
@@ -32,19 +32,15 @@ private:
 
   void handleClient(std::shared_ptr<boost::asio::ip::tcp::socket> socket)
   {
-    std::cout << "handle client" << std::endl;
     // Read data from the client asynchronously
     socket->async_read_some(boost::asio::buffer(buffer_),
 			    [this,socket](const boost::system::error_code& error, std::size_t bytesTransferred) {
-			      std::cout << "handle client 1" << std::endl;
-
 			      if (!error)
 				{
 				  // Process the received data
-				  std::cout << "Received data from client: " << std::string(buffer_.data(), bytesTransferred) << std::endl; 
-				  
+				  std::cout << "Received data from client: " << std::string(buffer_.data(), bytesTransferred) << std::endl;
+
 				  // Echo the data back to the client
-				  
 				  boost::asio::async_write(*socket, boost::asio::buffer(buffer_, bytesTransferred),
 							   [this, socket](const boost::system::error_code& error, std::size_t bytesTransferred) {
 							     if (!error) {
@@ -56,14 +52,13 @@ private:
 								 std::cout << "Write error " << error.message() << std::endl;
 							       }
 							   });
-			    
+
 				}
 			      else
 				{
 				  std::cout << "Read error " << error.message() << std::endl;
 				}
 			    });
-    std::cout << "handle client complted" << std::endl;
   }
 
 private:
