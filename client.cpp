@@ -85,10 +85,15 @@ int main()
 					    std::placeholders::_1));
   // Send a message to the server
   std::string message = "Hello, Server!";
-  //  boost::asio::async_write(socket, boost::asio::buffer(message), handleWrite);
-  // Receive a response from the server
-  //socket.async_read_some(boost::asio::buffer(buffer), handleRead);
   // Run the IO service
-  io_context.run();
+  std::thread th([&io_context](){io_context.run();});
+
+  // while(true)
+  //   {
+
+  //     //      t.write_msg();
+  //   }
+
+  th.join();
   return 0;
 }
