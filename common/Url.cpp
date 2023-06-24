@@ -25,6 +25,27 @@ CONN_TYPE get_type() const
   return m_type;
 }
 
+std::string get_type_str() const
+{
+  switch(m_type)
+    {
+    case TCP:
+      return std::string("tcp");
+    case MCP:
+      return std::string("mcp");
+    case UNIX:
+      return std::string("unix");
+    case SHM:
+      return std::string("shm");
+    case UDP:
+      return std::string("udp");
+    case DEFAULT:
+      return std::string("default");
+    default:
+      return std::string("default");
+    }
+}
+
 bool parse(const std::string& url)
 {
   m_type = CONN_TYPE::DEFAULT;

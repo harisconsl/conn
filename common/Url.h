@@ -36,6 +36,8 @@ class Url
 
   CONN_TYPE get_type() const;
 
+  std::string get_type_str() const;
+
   std::string get_addresss() const;
 
   std::string get_option(const std::string& def) const;
