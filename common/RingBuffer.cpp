@@ -28,11 +28,11 @@ bool RingBuffer::alloc( uint32_t capacity)
   m_capacity = SC_PAGE_UP(capacity);
   
   char path[] = "/tmp/rb-XXXXXX";
-  int fd, status;
+  int status;
   void *address;
   void* buf;
 
-  fd = mkstemp(path);
+  Scoped fd = mkstemp(path);
   if (fd < 0)
     return false;
 
