@@ -4,6 +4,9 @@
 #include <stddef.h>
 #include <stdint.h>
 
+namespace IN{
+namespace COMMON{
+
 class NotifierFd
 {
   public:
@@ -19,5 +22,7 @@ class NotifierFd
  private:
   int m_event_fd;
 
-}
+};
+
+}}
 #endif

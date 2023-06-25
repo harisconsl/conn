@@ -30,6 +30,10 @@ public:
 
   bool flush();
 
+  virtual int read(char* buf, int len) = 0;
+
+  virtual int write(char* buf, int len) = 0;
+  
 protected:
   
   boost::asio::io_context& m_io_context;

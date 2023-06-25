@@ -1,5 +1,10 @@
 #ifndef _IN_MACROS_H_
 #define _IN_MACROS_H_
+#include <unistd.h>
+
+#define SC_PAGE_UP(x) ({                                        \
+      const __typeof__(x) page_size = sysconf(_SC_PAGESIZE);	\
+      ((x) / ps + 1) * ps;})					\
 
 
 #define PREVENT_COPY(type)                      \

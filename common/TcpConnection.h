@@ -14,14 +14,12 @@ class TcpConnection
   virtual bool is_open() override;
   virtual std::string address() override;
   virtual int get_fd();
+
+  Connection* create(const Url& url);
   
  private:
   TcpConnection(bool is_stream);
   PREVENT_COPY(TcpConnection);
-
-
-
-
 };
 
 }}
