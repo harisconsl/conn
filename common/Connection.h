@@ -40,6 +40,13 @@ protected:
   std::string m_url;
   std::string m_address;
   int m_fd;
+
+  // below
+  bool m_verbose;
+  bool m_is_stream;
+  RingBuffer m_read_buf;
+  RingBuffer m_write_buf;
+  
   
 private:
   Connection(bool is_stream);

@@ -21,8 +21,16 @@ static Connection* Connection::get_connection(const std::string& url_str, boost:
  return iter->second(url);
 }
 
-Connection::Connection(bool isstream)
-{ }
+Connection::Connection(bool is_stream)
+  : m_is_stream(is_stream)
+  , m_verbose(false)
+{
+  const char* verbose_str = getenv("DEBUG_CONN");
+  if ( verbose_str != nullptr)
+    m_verbose = strtol(verbose_str, nullptr, 10);
+  if (m_verbose > 0)
+    LOG_I("Logging enabled = "<< m_verbose);
+}
 
 bool Connection::register()
 {
