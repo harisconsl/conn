@@ -19,6 +19,8 @@ class RingBuffer
   int fd();
   
   std::pair<uint8_t*, size_t> write_buffer();
+  std::pair<uint8_t*, size_t> read_buffer();
+
   
   void advance_read(uint32_t increment);
   void advance_write(uint32_t increment);

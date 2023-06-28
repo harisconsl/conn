@@ -85,6 +85,13 @@ bool RingBuffer::clear_fd()
   return m_notfier.clear();
 }
 
+std::pair<uint8_t* , size_t> RingBuffer::read_buffer()
+{
+  uint32_t read_idx = m_read_idx.load(std::memory_order_acquire);
+  uint32_t write_idx = m_write_idx.load(std::memory_order_acquire);
+  return std::make_pair(m_buffer + read_idx, write_idx - read_idx);
+}
+
 std::pair<uint8_t* , size_t> RingBuffer::write_buffer()
 {
   uint32_t read_idx = m_read_idx.load(std::memory_order_acquire);
