@@ -1,10 +1,11 @@
+#include "ServerConnection.h"
 #include "Url.h"
 
-std::map<string, Connection::get_mcast_connection> Connection::m_conn_creator = null;
+std::map<string, ServerConnection::get_mcast_connection> Connection::m_conn_creator = null;
 
-Connection::register();
+ServerConnection::register();
 
-static Connection* Connection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
+static ServerConnection* Connection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
 {
   // call get connection function
   Url url(url_str);
@@ -20,7 +21,7 @@ static Connection* Connection::get_connection(const std::string& url_str, boost:
   return iter->second(url, io_context);
 }
 
-Connection::Connection(bool is_stream)
+ServerConnection::Connection(bool is_stream)
   : m_is_stream(is_stream)
   , m_verbose(false)
 {
@@ -32,7 +33,7 @@ Connection::Connection(bool is_stream)
     LOG_I("Logging enabled = "<< m_verbose);
 }
 
-bool Connection::register()
+bool ServerConnection::register()
 {
   if (!m_conn_creator.size())
     return false;
@@ -43,7 +44,6 @@ bool Connection::register()
   REG_CONN_FUNC("tcp",  TcpConnection::create);
   REG_CONN_FUNC("mcp",  McastConnection::create);
   REG_CONN_FUNC("unix", UnixConnection::create);
-  REG_CONN_FUNC("shm",  ShmConnection::create);
 
   return true;
 }

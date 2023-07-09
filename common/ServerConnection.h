@@ -1,5 +1,5 @@
-#ifndef _IN_COMMON_CONNECTION_H_
-#define _IN_COMMON_CONNECTION_H_
+#ifndef _IN_COMMON_SERVER_CONNECTION_H_
+#define _IN_COMMON_SERVER_CONNECTION_H_
 
 #include <string.h>
 #include <boost/asio.hpp>
@@ -7,7 +7,7 @@
 namespace IN {
 namespace COMMON {
 
-class Connection
+class ServerConnection
 {
 public:
   static constexpr int MAX_PACKET_SIZE = 1024*1024*8;
@@ -49,13 +49,13 @@ protected:
   
   
 private:
-  Connection(bool is_stream, boost::asio::io_context& io_context);
+  ServerConnection(bool is_stream, boost::asio::io_context& io_context);
   static bool register();
 
   static bool m_initialized;
   static std::map<std::string, Connection*> m_conn_creator;
 
-  PREVENT_COPY(Connection);
+  PREVENT_COPY(ServerConnection);
 };
  
 }}

@@ -1,19 +1,19 @@
+#include <TcpServerConnection.h>
 using namespace std;
 using namespace IN::COMMON;
 
 typedef boost::asio::ip bai;
 
-TcpConnection::TcpConnection(bool is_stream, boost::asio::io_context& io_context)
+TcpServerConnection::TcpServerConnection(bool is_stream, boost::asio::io_context& io_context)
   : Connection(is_stream)
   , socket_(io_context)
 { }
 
-TcpConnection* TcpConnection::create(const Url& url, boost::asio::io_context& io_context)
+TcpServerConnection* TcpServerConnection::create(const Url& url, boost::asio::io_context& io_context)
 {
   //bai::tcp::endpoint ep(bai::address::from_string(127.0.0.1), 8080);
   // socket_ = std::make_shared<bai::tcp::socket>(m_io_context);
   
-  std::string host = url.get_address();
   std::string port = url.get_option("port");
 
   if (!host.size() || !port.size())
@@ -22,14 +22,14 @@ TcpConnection* TcpConnection::create(const Url& url, boost::asio::io_context& io
       return nullptr;
     }
 
-  TcpConnection connection = new TcpConnection(is_stream, io_context);
+  TcpServerConnection connection = new TcpServerConnection(is_stream, io_context);
 
   // intialize the private memeberiof the class
-  connection->m_host = host;
+
   connection->m_port = port;
 }
 
-bool TcpConnection::open()
+bool TcpServerConnection::open()
 {
   //  if (socket_.is_open())
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(m_host), m_port);
@@ -37,7 +37,7 @@ bool TcpConnection::open()
 }
 
 
-void TcpConnection::handle_connect(const boost::system::error_code& error)
+void TcpServerConnection::handle_connect(const boost::system::error_code& error)
 {
   if (!error)
     {
@@ -52,7 +52,7 @@ void TcpConnection::handle_connect(const boost::system::error_code& error)
     }
 }
 
-void TcpConnection::handle_write(const boost::system::error_code& error, std::size_t bytes_transferred)
+void TcpServerConnection::handle_write(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
   if (!error)
     {
@@ -65,7 +65,7 @@ void TcpConnection::handle_write(const boost::system::error_code& error, std::si
     }
 }
 
-void TcpConnection::handle_read(const boost::system::error_code& error, std::size_t bytes_transferred)
+void TcpServerConnection::handle_read(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
   if (!error)
     {
@@ -77,7 +77,7 @@ void TcpConnection::handle_read(const boost::system::error_code& error, std::siz
     }
 }
 
-void TcpConnection::do_close()
+void TcpServerConnection::do_close()
 {
   socket_->cancel(); // Cancel any pending asynchronous operations
   // 3. Close the socket
@@ -94,14 +94,14 @@ void TcpConnection::do_close()
   }
 }
 
-bool TcpConnection::is_open()
+bool TcpServerConnection::is_open()
 {
   if (socket_.is_open())
     return true;
   return false;
 }
 
-std::string TcpConnection::address()
+std::string TcpServerConnection::address()
 {
   return m_address + ":" + m_port;
 }

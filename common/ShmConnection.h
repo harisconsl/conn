@@ -14,8 +14,12 @@ class ShmConnection
   virtual int get_fd();
   
  private:
-  ShmConnection(bool is_stream);
+  ShmConnection(bool is_stream, boost::asio::io_context& io_context);
   PREVENT_COPY(ShmConnection);
+  
+  boost::asio::posix::stream_descriptor stream_;
+  void* mapped_memory;
+  
 };
 
 }}
