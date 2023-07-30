@@ -2,6 +2,9 @@
 #define _IN_COMMON_SCOPED_FD_H_
 #include <unistd.h>
 
+namespace IN{
+namespace COMMON{
+
 class ScopedFd
 {
  public:
@@ -9,7 +12,7 @@ class ScopedFd
    : m_fd(fd)
     { }
 
- ~ScopedFd
+  ~ScopedFd()
   {
     if (m_fd > 0)
       close(m_fd);
@@ -29,5 +32,7 @@ class ScopedFd
  
  private:
   int m_fd;
-}
+};
+
+}}
 #endif

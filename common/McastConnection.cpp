@@ -1,17 +1,21 @@
+#include "McastConnection.h"
+#include <iostream>
+#include <boost/lexical_cast.hpp>
+#include "Logger.h"
+
 using namespace std;
 using namespace IN::COMMON;
 
-typedef boost::asio::ip bai;
-
 McastConnection::McastConnection(bool is_stream, boost::asio::io_context& io_context)
   : Connection(is_stream)
-  , socket_(io_context)
+  , socket_(io_context, boost::asio::ip::udp::endpoint(boost::asio::ip::udp::v4(), 0))
 { }
 
 McastConnection* McastConnection::create(const Url& url, boost::asio::io_context& io_context)
 {
   std::string host = url.get_address();
   std::string port = url.get_option("port");
+  std::string interface_addr = url.get_option("interface_addr");
 
   if (!host.size() || !port.size())
     {
@@ -19,45 +23,45 @@ McastConnection* McastConnection::create(const Url& url, boost::asio::io_context
       return nullptr;
     }
 
-  McastConnection connection = new McastConnection(is_stream, io_context);
+  McastConnection* connection = new McastConnection(false, io_context);
 
   // intialize the private memeberiof the class
-  connection->m_host = host;
-  connection->m_port = port;
+  connection->m_address = host;
+  try
+    {
+      connection->m_port = boost::lexical_cast<unsigned short>(port);
+    }
+  catch(const boost::bad_lexical_cast & ex)
+    {
+      LOG_E("bad lexical cast of port " << ex.what());
+      return nullptr;
+    }
+  connection->m_interface_addr = interface_addr;
+
+  return connection;
 }
 
 void McastConnection::join_group()
 {
-  socket_(ioContext, bai::udp::endpoint(bai::udp::v4(), 0)
-  bai::address multicastAddr = bai::address::from_string(m_host);
-  socket_.set_option(bai::multicast::join_group(m_host));
-  socket_.set_option(bai::multicast::outbound_interface(interfaceAddr));
+  boost::asio::ip::address multicast_addr = boost::asio::ip::address::from_string(m_address);
+  socket_.set_option(boost::asio::ip::multicast::join_group(multicast_addr));
+  socket_.bind(boost::asio::ip::udp::endpoint(boost::asio::ip::address::from_string(m_interface_addr), 0));
+
+  char buffer[1024];
+  boost::asio::ip::udp::endpoint sender_ep;
+  socket_.async_receive_from(boost::asio::buffer(buffer), sender_ep,
+                             std::bind(&McastConnection::handle_recv, this,
+                                       std::placeholders::_1, std::placeholders::_2));
+
 }
 
 void McastConnection::leave_group()
 {
-  bai::address multicastAddr = socket_.local_endpoint().address();
-  socket_.set_option(bai::multicast::leave_group(multicastAddr));
+  boost::asio::ip::address multicastAddr = socket_.local_endpoint().address();
+  socket_.set_option(boost::asio::ip::multicast::leave_group(multicastAddr));
 }
 
-bool McastConnection::handle_recv(const boost::system::error_code& ec, std::size_t bytes_transferred)
+void McastConnection::handle_recv(const boost::system::error_code& ec, std::size_t bytes_transferred)
 {
-  udp::endpoint endpointp(bai::address::from_string(m_host, std::stoi(m_port));
-			  socket_.async_receive_from( boost::asio::buffer(buffer), endpoint,
-						      std::bind(&McastConnection::handle_read, this, 
-								std::placeholders::_1, std::placeholders::_2));
+
 }
-
-void UnixConnection::handle_read(const boost::system::error_code& error, std::size_t bytes_transferred)
-{
-  if (!error)
-    {
-      std::cout << "Received message: " << std::string(buffer.data(), bytes_transferred) << std::endl;
-    }
-  else
-    {
-      std::cout << "Read error: " << error.message() << std::endl;
-    }
-}
-
-

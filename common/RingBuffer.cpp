@@ -1,4 +1,8 @@
-#include <ringbuffer.h>
+#include "RingBuffer.h"
+#include "ScopedFd.h"
+#include "Utils.h"
+
+using namespace IN::COMMON;
 
 RingBuffer::RingBuffer()
   : m_buf(nullptr)
@@ -11,7 +15,7 @@ RingBuffer::~RingBuffer()
 {
   if (m_buf)
     {
-      munmap(m_buf. m_capacity << 1);
+      munmap(m_buf, m_capacity << 1);
       m_buf = nullptr;
     }
 }
@@ -22,7 +26,7 @@ bool RingBuffer::alloc( uint32_t capacity)
   if (m_buf)
     return false;
 
-  if (!m_notifier.init())
+  if (!m_notifier.init_fd())
     return false;
 
   m_capacity = SC_PAGE_UP(capacity);
@@ -32,7 +36,7 @@ bool RingBuffer::alloc( uint32_t capacity)
   void *address;
   void* buf;
 
-  Scoped fd = mkstemp(path);
+  ScopedFd fd = mkstemp(path);
   if (fd < 0)
     return false;
 
@@ -61,7 +65,7 @@ bool RingBuffer::alloc( uint32_t capacity)
   if (address != buf + m_capacity)
     return false;
 
-  m_buf = reinterpret_cast<int8_t>(buf);
+  m_buf = reinterpret_cast<uint8_t*>(buf);
   return true;
 }
 
@@ -69,27 +73,27 @@ void RingBuffer::free()
 {
   if (m_buf)
     {
-      munmap(m_buf. m_capacity << 1);
+      munmap(m_buf, m_capacity << 1);
       m_buf = nullptr;
     }
-  m_notfier.close();
+  m_notifier.close_fd();
 }
 
 bool RingBuffer::notify_fd()
 {
- return  m_notfier.notify();
+ return  m_notifier.notify();
 }
 
 bool RingBuffer::clear_fd()
 {
-  return m_notfier.clear();
+  return m_notifier.clear_fd();
 }
 
 std::pair<uint8_t* , size_t> RingBuffer::read_buffer()
 {
   uint32_t read_idx = m_read_idx.load(std::memory_order_acquire);
   uint32_t write_idx = m_write_idx.load(std::memory_order_acquire);
-  return std::make_pair(m_buffer + read_idx, write_idx - read_idx);
+  return std::make_pair(m_buf + read_idx, write_idx - read_idx);
 }
 
 std::pair<uint8_t* , size_t> RingBuffer::write_buffer()
@@ -106,12 +110,12 @@ std::pair<uint8_t* , size_t> RingBuffer::write_buffer()
   return std::make_pair(m_buf + write_idx, m_capacity - (write_idx - read_idx));
 }
 
-void RingBuffer::adavanced_write( uint32_t increment)
+void RingBuffer::advance_write( uint32_t increment)
 {
-  m_write_idx.fetch_add( increment, std::memory_order_release));
+  m_write_idx.fetch_add( increment, std::memory_order_release);
 }
 
-void RingBuffer::adavanced_read( uint32_t increment)
+void RingBuffer::advance_read( uint32_t increment)
 {
   uint32_t read_idx = m_read_idx.load(std::memory_order_acquire);
   read_idx += increment;

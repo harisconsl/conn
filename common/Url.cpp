@@ -1,4 +1,8 @@
 #include "Url.h"
+#include <sstream>
+#include "Logger.h"
+
+using namespace IN::COMMON;
 
 Url::Url(const std::string& url)
 {
@@ -6,7 +10,7 @@ Url::Url(const std::string& url)
     throw std::invalid_argument("Unable to parse " + url);
 }
 
-std::string get_option(const std::string& def) const
+std::string Url::get_option(const std::string& def) const
 {
   auto iter = m_options.find(def);
   if ( iter != m_options.end())
@@ -15,38 +19,38 @@ std::string get_option(const std::string& def) const
   return "";
 }
 
-std::string get_address() const
+std::string Url::get_address() const
 {
-  return m_address; 
+  return m_address;
 }
 
-CONN_TYPE get_type() const
+CONN_TYPE Url::get_type() const
 {
   return m_type;
 }
 
-std::string get_type_str() const
+std::string Url::get_type_str() const
 {
   switch(m_type)
     {
-    case TCP:
+    case CONN_TYPE::TCP:
       return std::string("tcp");
-    case MCP:
+    case CONN_TYPE::MCP:
       return std::string("mcp");
-    case UNIX:
+    case CONN_TYPE::UNIX:
       return std::string("unix");
-    case SHM:
+    case CONN_TYPE::SHM:
       return std::string("shm");
-    case UDP:
+    case CONN_TYPE::UDP:
       return std::string("udp");
-    case DEFAULT:
+    case CONN_TYPE::DEFAULT:
       return std::string("default");
     default:
       return std::string("default");
     }
 }
 
-bool parse(const std::string& url)
+bool Url::parse(const std::string& url)
 {
   m_type = CONN_TYPE::DEFAULT;
   m_address = "";
@@ -90,12 +94,12 @@ bool parse(const std::string& url)
     {
       url_stream >> add_substr;
       if (url_stream.good())
-	getline(url_stream, m_address, OPT_DELIMIT);
+        std::getline(url_stream, m_address, OPT_DELIMIT);
     }
   else
     {
-      m_address = add_substr( 0, pos);
-      url_stream >> add_substr( pos + PORT_DELIMIT.size()); 
+      m_address = add_substr.substr( 0, pos);
+      //      url_stream >> add_substr.substr( pos + 1); // for PORT_DELIMIT 1 is added
     }
 
   bool port_identified = false;
@@ -104,18 +108,18 @@ bool parse(const std::string& url)
       std::string option;
       std::string value;
       std::string op_val;
-      getline(url_stream, op_val, ',');
+      std::getline(url_stream, op_val, ',');
 
       std::stringstream op_val_stream(op_val);
 
-      getline(op_val_stream, option, '=');
+      std::getline(op_val_stream, option, '=');
       if (!op_val_stream.good() && !port_identified)
 	{
 	  m_options.insert(std::make_pair("port",option));
 	  port_identified = true;
 	}
 
-      getline(op_val_stream, value, ',');
+      std::getline(op_val_stream, value, ',');
 
       if (option.length() && value.length())
 	{

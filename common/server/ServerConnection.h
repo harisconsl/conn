@@ -1,21 +1,14 @@
-#ifndef _IN_COMMON_CONNECTION_H_
-#define _IN_COMMON_CONNECTION_H_
+#ifndef _IN_COMMON_SERVER_CONNECTION_H_
+#define _IN_COMMON_SERVER_CONNECTION_H_
 
-#include <functional>
+#include "Connection.h"
 #include <string.h>
 #include <boost/asio.hpp>
-#include "Macros.h"
-#include "Url.h"
-#include "RingBuffer.h"
-
 
 namespace IN {
 namespace COMMON {
 
-class ConnListener;
-class Packet;
-
-class Connection
+class ServerConnection : public Connection
 {
 public:
   static constexpr int MAX_PACKET_SIZE = 1024*1024*8;
@@ -38,15 +31,13 @@ public:
 
   bool flush();
 
-  virtual int read(char* buf, int len) = 0;
+  virtual int read(char* buf, int len) {}
 
-  virtual int write(char* buf, int len) = 0;
-
-  static bool register_factory();
-
+  virtual int write(char* buf, int len) {}
   
 protected:
   
+  boost::asio::io_context& m_io_context;
   std::string m_url;
   std::string m_address;
   int m_fd;
@@ -57,14 +48,15 @@ protected:
   RingBuffer m_read_buf;
   RingBuffer m_write_buf;
   
-  Connection(bool is_stream);
+  
 private:
+  ServerConnection(bool is_stream, boost::asio::io_context& io_context);
+  static bool register_factory();
 
   static bool m_initialized;
-  //typedef Connection* (*create_connection) (const Url& url, boost::asio::io_context& io_context);
-  static std::map<const std::string, std::function<Connection* (const Url& url, boost::asio::io_context& io_context)>> m_conn_creator;
+  static std::map<std::string, Connection*> m_conn_creator;
 
-  PREVENT_COPY(Connection);
+  PREVENT_COPY(ServerConnection);
 };
  
 }}

@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <boost/asio.hpp>
-
+#include "common/Logger.h"
 class Server {
 public:
   Server(boost::asio::io_context& ioContext, unsigned short port)
@@ -68,6 +68,7 @@ private:
 
 int main()
 {
+  LOG_I("starting server");
   boost::asio::io_context ioContext;
   unsigned short port = 8080;
   try

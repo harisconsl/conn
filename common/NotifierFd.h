@@ -13,15 +13,14 @@ class NotifierFd
   NotifierFd();
   ~NotifierFd();
 
-  bool get_fd();
+  int get_fd() const;
   bool notify();
   bool clear_fd();
 
-  void init_fd();
+  bool init_fd();
   void close_fd();
  private:
   int m_event_fd;
-
 };
 
 }}

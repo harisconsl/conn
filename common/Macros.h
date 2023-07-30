@@ -18,7 +18,7 @@
   type& operator = (type&&) = delete;           
 
 #define PREVENT_COPY_MOVE(type)                 \
-  PREVENT_COPY(type)                         
+  PREVENT_COPY(type)                            \
   PREVENT_MOVE(type)
 
 #endif

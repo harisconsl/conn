@@ -1,4 +1,7 @@
 #include "SignalCatcher.h"
+#include "Logger.h"
+
+using namespace IN::COMMON;
 
 SignalCatcher& SignalCatcher::get_instance()
 {
@@ -8,11 +11,11 @@ SignalCatcher& SignalCatcher::get_instance()
 
 SignalCatcher::SignalCatcher()
 {
-  std::signal(SIGINT, &SignalCatcher::handleSignal);
-  std::signal(SIGTERM, &SignalCatcher::handleSignal);
+  //  std::signal(SIGINT, SignalCatcher::handle_signal);
+  // std::signal(SIGTERM, SignalCatcher::handle_signal);
 }
 
-void SignalCatcher::handle_signal()
+void SignalCatcher::handle_signal(int signal)
 {
   if (signal == SIGINT)
     {
@@ -26,10 +29,10 @@ void SignalCatcher::handle_signal()
   // Optionally, restore the default signal handler
   std::signal(signal, SIG_DFL);
   if (m_callback)
-    m_callback();
+    m_callback(signal);
 }
 
-void SignalCatcher::set_callback(std::funtional<void> callback)
+void SignalCatcher::set_callback(std::function<void(int)> callback)
 {
   m_callback = callback;
 }

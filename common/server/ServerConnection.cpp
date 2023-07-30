@@ -1,35 +1,27 @@
-#include "Connection.h"
-
+#include "ServerConnection.h"
 #include "Url.h"
-#include "TcpConnection.h"
-#include "McastConnection.h"
-#include "UnixConnection.h"
-#include "ShmConnection.h"
 
-#include "Logger.h"
+std::map<string, ServerConnection::get_mcast_connection> Connection::m_conn_creator = null;
 
-using namespace IN::COMMON;
+ServerConnection::register();
 
-std::map<const std::string, std::function< Connection*(const Url& url, boost::asio::io_context& io_context)>> Connection::m_conn_creator;
-//bool Connection::register_factory();
-
-Connection* Connection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
+static ServerConnection* Connection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
 {
   // call get connection function
   Url url(url_str);
-  std::string type_str = url.get_type_str();
+  string type_str = url.get_type_str();
   auto iter =  m_conn_creator.find(type_str);
 
-  if ( iter == m_conn_creator.end())
+  if ( iter = m_conn_creator.end())
     {
       LOG_I("Connection type not found :" << type_str);
-      return nullptr;
+      return null;
     }
   
   return iter->second(url, io_context);
 }
 
-Connection::Connection(bool is_stream)
+ServerConnection::ServerConnection(bool is_stream)
   : m_is_stream(is_stream)
   , m_verbose(false)
 {
@@ -41,18 +33,17 @@ Connection::Connection(bool is_stream)
     LOG_I("Logging enabled = "<< m_verbose);
 }
 
-bool Connection::register_factory()
+bool ServerConnection::register()
 {
   if (!m_conn_creator.size())
     return false;
 
-#define REG_CONN_FUNC(type, func)                      \
+#define REG_CONN_FUNC (type, func)                     \
     m_conn_creator.insert(std::make_pair(type, func))
- 
+  
   REG_CONN_FUNC("tcp",  TcpConnection::create);
   REG_CONN_FUNC("mcp",  McastConnection::create);
   REG_CONN_FUNC("unix", UnixConnection::create);
-  REG_CONN_FUNC("shm",  ShmConnection::create);
 
   return true;
 }
