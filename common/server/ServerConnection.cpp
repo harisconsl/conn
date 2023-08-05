@@ -1,11 +1,15 @@
 #include "ServerConnection.h"
 #include "Url.h"
 
-std::map<string, ServerConnection::get_mcast_connection> Connection::m_conn_creator = null;
+#include "TcpServerConnection.h"
+#include "UnixServerConnection.h"
+#include "Logger.h"
 
-ServerConnection::register();
+std::map<const std::string, std::function<ServerConnection*(const Url& url, boost::asio::io_context& io_context)>> ServerConnection::m_conn_creator = null;
 
-static ServerConnection* Connection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
+ServerConnection::register_factory();
+
+static ServerConnection* ServerConnection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
 {
   // call get connection function
   Url url(url_str);
@@ -33,17 +37,16 @@ ServerConnection::ServerConnection(bool is_stream)
     LOG_I("Logging enabled = "<< m_verbose);
 }
 
-bool ServerConnection::register()
+bool ServerConnection::register_factory()
 {
   if (!m_conn_creator.size())
     return false;
 
-#define REG_CONN_FUNC (type, func)                     \
-    m_conn_creator.insert(std::make_pair(type, func))
+#define REG_CONN_FUNC(type, func)                       \
+  m_conn_creator.insert(std::make_pair(type, func))
   
-  REG_CONN_FUNC("tcp",  TcpConnection::create);
-  REG_CONN_FUNC("mcp",  McastConnection::create);
-  REG_CONN_FUNC("unix", UnixConnection::create);
+  REG_CONN_FUNC("tcp",  TcpServerConnection::create);
+  REG_CONN_FUNC("unix", UnixServerConnection::create);
 
   return true;
 }

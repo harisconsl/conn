@@ -1,20 +1,20 @@
 #include "TcpServerConnection.h"
 #include "Logger.h"
+#include <boost/lexical_cast.hpp>
+
 using namespace std;
 using namespace IN::COMMON;
 
 typedef boost::asio::ip bai;
 
 TcpServerConnection::TcpServerConnection(bool is_stream, boost::asio::io_context& io_context)
-  : Connection(is_stream)
+  : ServerConnection(is_stream)
   , socket_(io_context)
 { }
 
 TcpServerConnection* TcpServerConnection::create(const Url& url, boost::asio::io_context& io_context)
 {
-  //bai::tcp::endpoint ep(bai::address::from_string(127.0.0.1), 8080);
-  // socket_ = std::make_shared<bai::tcp::socket>(m_io_context);
-  
+  std::string host = url.get_address();
   std::string port = url.get_option("port");
 
   if (!host.size() || !port.size())
@@ -23,18 +23,26 @@ TcpServerConnection* TcpServerConnection::create(const Url& url, boost::asio::io
       return nullptr;
     }
 
-  TcpServerConnection connection = new TcpServerConnection(is_stream, io_context);
+  TcpServerConnection* connection = new TcpServerConnection(is_stream, io_context);
 
   // intialize the private memeberiof the class
+  try
+    {
+      connection->m_port = boost::lexical_cast<unsigned short>(port);
+    }
+  catch(const boost::bad_lexical_cast & ex)
+    {
+      LOG_E("bad lexical cast of port " << ex.what());
+      return nullptr;
+    }
 
-  connection->m_port = port;
+  return connection;
 }
 
 bool TcpServerConnection::open()
 {
-  //  if (socket_.is_open())
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(m_host), m_port);
-  socket_.async_connect(endpoint, std::bind(&TcpConnection::handle_connect, this, std::placeholders::_1));
+  socket_.async_connect(endpoint, std::bind(&TcpServerConnection::handle_connect, this, std::placeholders::_1));
 }
 
 
@@ -42,27 +50,28 @@ void TcpServerConnection::handle_connect(const boost::system::error_code& error)
 {
   if (!error)
     {
-      LOG_I("Connected to the server!");
+      std::cout << "Connected to the server!" << std::endl;
       std::string message = "Hello, Server!";
       boost::asio::async_write(*socket_, boost::asio::buffer(message.c_str(), message.size()),
 			       std::bind(&TcpConnection::handle_write, this, std::placeholders::_1, std::placeholders::_2));
     }
   else
     {
-      LOG_I("Connection error: " << error.message() );
+      std::cout << "Connection error: " << error.message() << std::endl;
     }
 }
 
 void TcpServerConnection::handle_write(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
+  char buffer[1024];
   if (!error)
     {
-      LOG_I( "Message sent!");
-      socket_->async_read_some(boost::asio::buffer(buffer), std::bind(&TcpConnection::handle_read, this, std::placeholders::_1, std::placeholders::_2));
-      }
+      std::cout << "Message sent!" << std::endl;
+      socket_->async_read_some(boost::asio::buffer(buffer), std::bind(&TcpServerConnection::handle_read, this, std::placeholders::_1, std::placeholders::_2));
+    }
   else
     {
-      LOG_I("Write error: " << error.message() );
+      std::cout << "Write error: " << error.message() << std::endl;
     }
 }
 
@@ -70,11 +79,11 @@ void TcpServerConnection::handle_read(const boost::system::error_code& error, st
 {
   if (!error)
     {
-      LOG_I("Received message: " << std::string(buffer.data(), bytes_transferred) );
+      //      std::cout << "Received message: " << std::string(buffer.data(), bytes_transferred) << std::endl;
     }
   else
     {
-      LOG_I("Read error: " << error.message());
+      LOG_E("Read error: " << error.message());
     }
 }
 
@@ -86,12 +95,12 @@ void TcpServerConnection::do_close()
   socket_->shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
   if (ec) {
     // Handle error
-    LOG_E("Socket close error 1: " << ec.message() );
+    LOG_E( "Socket close error 1: " << ec.message());
   }
   socket_->close(ec);
   if (ec) {
     // Handle error
-    LOG_E("Socket close error 2: " << ec.message() );
+    LOG_E("Socket close error 2: " << ec.message());
   }
 }
 
@@ -99,6 +108,7 @@ bool TcpServerConnection::is_open()
 {
   if (socket_.is_open())
     return true;
+
   return false;
 }
 

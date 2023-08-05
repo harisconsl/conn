@@ -1,27 +1,14 @@
-#cmake_minimum_required(VERSION 3.12)
+project(test VERSION 1.0)
 
-# Add source files
-set(SOURCES
-    test_tcp.cpp
+file(GLOB SRC
+    "*.cpp"
 )
 
-add_executable(testtcp ${SOURCES} ${HEADERS})
+add_executable(test ${SRC})
+target_include_directories(test PUBLIC ${Boost_INCLUDE_DIRS} ${MY_SUPPORT}/googletest/include)
+target_link_libraries(test PUBLIC ${Boost_LIBRARIES} pthread common /home/pgupta/workspace/test/apache-log4cxx-1.1.0/install/lib64/liblog4cxx.so ${MY_SUPPORT}/googletest/lib/libgtest.a ${MY_SUPPORT}/googletest/lib/libgmock.a ${MY_SUPPORT}/googletest/lib/libgtest_main.a ${MY_SUPPORT}/googletest/lib/libgmock_main.a)
 
-#target_include_directories(test_tcp PRIVATE ${Boost_INCLUDE_DIRS})
 
-# Add additional compile options if needed
-# target_compile_options(MyExecutable PRIVATE -Wall -Wextra)
 
-# Add additional libraries if needed
-# target_link_libraries(MyExecutable PUBLIC my_library)
-
-# Specify any required packages (e.g., find and link to Boost)
-# find_package(Boost REQUIRED)
-# target_link_libraries(MyExecutable PUBLIC Boost::boost)
-
-# Specify any required external dependencies (e.g., include and link directories)
-# target_include_directories(MyExecutable PRIVATE /path/to/external/include)
-# target_link_directories(MyExecutable PRIVATE /path/to/external/lib)
-# target_link_libraries(test_tcp PRIVATE ${Boost_LIBRARIES})
 
 

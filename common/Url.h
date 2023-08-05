@@ -34,7 +34,7 @@ class Url
   
   Url(const std::string& url);
   
-  ~Url();
+  ~Url() { }
 
   CONN_TYPE get_type() const;
 

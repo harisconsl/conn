@@ -1,7 +1,7 @@
 #include "RingBuffer.h"
 #include "ScopedFd.h"
 #include "Utils.h"
-
+#include "Logger.h"
 using namespace IN::COMMON;
 
 RingBuffer::RingBuffer()
@@ -62,10 +62,11 @@ bool RingBuffer::alloc( uint32_t capacity)
 
   address = mmap( buf + m_capacity, m_capacity,  PROT_READ | PROT_WRITE,
 		  MAP_FIXED | MAP_SHARED, fd, 0);
-  if (address != buf + m_capacity)
+  if (address != (void*)((uint8_t*)buf + m_capacity))
     return false;
 
   m_buf = reinterpret_cast<uint8_t*>(buf);
+  LOG_I("address: " << static_cast<void*>(m_buf));
   return true;
 }
 
@@ -77,6 +78,11 @@ void RingBuffer::free()
       m_buf = nullptr;
     }
   m_notifier.close_fd();
+}
+
+int RingBuffer::fd()
+{
+  return m_notifier.get_fd();
 }
 
 bool RingBuffer::notify_fd()
@@ -93,6 +99,7 @@ std::pair<uint8_t* , size_t> RingBuffer::read_buffer()
 {
   uint32_t read_idx = m_read_idx.load(std::memory_order_acquire);
   uint32_t write_idx = m_write_idx.load(std::memory_order_acquire);
+  LOG_I(__func__<< " write_idx : " << write_idx << " read_idx: " <<  read_idx);
   return std::make_pair(m_buf + read_idx, write_idx - read_idx);
 }
 
@@ -106,13 +113,15 @@ std::pair<uint8_t* , size_t> RingBuffer::write_buffer()
       read_idx = m_read_idx.load(std::memory_order_acquire);
       write_idx = m_write_idx.load(std::memory_order_acquire);
     }
-  
+  LOG_I(__func__<< " write_idx : " <<  write_idx << " read_idx: " << read_idx);  
   return std::make_pair(m_buf + write_idx, m_capacity - (write_idx - read_idx));
 }
 
 void RingBuffer::advance_write( uint32_t increment)
 {
   m_write_idx.fetch_add( increment, std::memory_order_release);
+  LOG_I(__func__<< " write_idx : " << m_write_idx << " read_idx: " << m_read_idx);
+
 }
 
 void RingBuffer::advance_read( uint32_t increment)
@@ -127,5 +136,6 @@ void RingBuffer::advance_read( uint32_t increment)
     }
   else
     m_read_idx.fetch_add(increment);
+  LOG_I(__func__<< " write_idx : " << m_write_idx << " read_idx: " << m_read_idx);
 }
 

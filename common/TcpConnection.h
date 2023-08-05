@@ -16,24 +16,30 @@ class TcpConnection : public Connection
   virtual int get_fd();
 
   virtual int read(char* buf, int len) { }
-
   virtual int write(char* buf, int len) { }
 
   static TcpConnection* create(const Url& url, boost::asio::io_context& io_context);
+
+  boost::asio::ip::tcp::socket get_socket();
+
+  bool connect();
+  void async_write(const char* buf, std::size_t len);
+  void async_read();
 
 private:
   TcpConnection(bool is_stream, boost::asio::io_context& io_context);
   PREVENT_COPY(TcpConnection);
 
   boost::asio::ip::tcp::socket socket_;
-  unsigned short m_port;
+  short m_port;
 
   void handle_connect(const boost::system::error_code& ec);
   void handle_write(const boost::system::error_code& ec, std::size_t bytes_transferred);
   void handle_read(const boost::system::error_code& ec, std::size_t bytes_transferred);
-  bool open();
-  void do_close();  
-};
+
+  void do_close();
+
+};                              
 
 }}
 #endif

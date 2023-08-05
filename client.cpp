@@ -80,7 +80,7 @@ int main()
   std::shared_ptr<boost::asio::ip::tcp::socket> socket = std::make_shared<boost::asio::ip::tcp::socket>(io_context);
   // Connect to the server
   TcpClient t(socket);
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8080);
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 41080);
   socket->async_connect(endpoint, std::bind(&TcpClient::handleConnect, &t,
 					    std::placeholders::_1));
   // Send a message to the server

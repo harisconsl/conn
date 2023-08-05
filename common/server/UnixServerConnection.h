@@ -1,11 +1,12 @@
 #ifndef _IN_COMMON_UNIX_SERVER_CONNECTION_H_
 #define _IN_COMMON_UNIX_SERVER_CONNECTION_H_
-#include "ServerConnection.h"
+
+#include "Connection.h"
 
 namespace IN {
 namespace COMMON {
 
-class UnixServerConnection : public ServerConnection
+class UnixServerConnection
 {
  public:
   static constexpr int DEFAULT_TIME_OUT;

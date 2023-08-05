@@ -6,12 +6,16 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(BOOST_ROOT $ENV{BOOST_HOME})
 
+set(MY_SUPPORT $ENV{QB_SUPPORT})
+
 # Find the Boost libraries
 find_package(Boost REQUIRED)
 
 include_directories(/home/pgupta/workspace/test/apache-log4cxx-1.1.0/install/include)
 
 add_subdirectory(common)
+add_subdirectory(test)
+add_subdirectory(example)
 
 # Add source files
 set(SOURCES

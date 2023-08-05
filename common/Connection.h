@@ -22,7 +22,7 @@ public:
 
   static Connection* get_connection(const std::string& url, boost::asio::io_context& io_context);
   
-  virtual ~Connection();
+  virtual ~Connection(){}
 
   virtual bool is_open() = 0;
 
@@ -30,6 +30,8 @@ public:
 
   virtual int get_fd() = 0;
 
+  virtual void close() final;
+ 
   bool add_listener(ConnListener* cl);
 
   bool send_packet(Packet* p);
@@ -59,9 +61,9 @@ protected:
   
   Connection(bool is_stream);
 private:
+  virtual void do_close() = 0;
 
   static bool m_initialized;
-  //typedef Connection* (*create_connection) (const Url& url, boost::asio::io_context& io_context);
   static std::map<const std::string, std::function<Connection* (const Url& url, boost::asio::io_context& io_context)>> m_conn_creator;
 
   PREVENT_COPY(Connection);

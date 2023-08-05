@@ -92,14 +92,15 @@ bool Url::parse(const std::string& url)
   pos = add_substr.find(PORT_DELIMIT);
   if (pos == std::string::npos)
     {
-      url_stream >> add_substr;
+      url_stream << add_substr;
       if (url_stream.good())
         std::getline(url_stream, m_address, OPT_DELIMIT);
     }
   else
     {
       m_address = add_substr.substr( 0, pos);
-      //      url_stream >> add_substr.substr( pos + 1); // for PORT_DELIMIT 1 is added
+      std::string rem = add_substr.substr( pos + 1); // for PORT_DELIMIT 1 is added
+      url_stream << rem;
     }
 
   bool port_identified = false;
@@ -127,7 +128,7 @@ bool Url::parse(const std::string& url)
 	}
       else if (option.length() && !value.length())
 	{
-	  LOG_W("Invalid option : "<< option << " in URL : " << url << " .. ignoring!" );
+	  LOG_D("Invalid option : "<< option << " in URL : " << url << " .. ignoring!" );
 	}
     }
   return (m_address.length() > 0);  

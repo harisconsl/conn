@@ -1,6 +1,5 @@
-#include "UnixServerConnection.h"
+#include <UnixServerConnection.h>
 
-using namespace IN::COMMON;
 boost::asio::local::stream_protocol;
 boost::asio::io_context io_context
 
@@ -9,7 +8,7 @@ UnixServerConnection::UnixServerConnection(bool is_stream, boost::asio::io_conte
   , socket_(io_context)
 { }
 
-UnixServerConnection* UnixServerConnection::create(bool is_stream, boost::asio::io_context& io_context)
+UnixServerConnection* UnixServerConnection::create(const Url& url,, boost::asio::io_context& io_context)
 {
   std::string host = url.get_address();
   if (!host.size())
@@ -19,43 +18,44 @@ UnixServerConnection* UnixServerConnection::create(bool is_stream, boost::asio::
     }
 
   UnixServerConnection* connection = new UnixServerConnection(is_stream, io_context);
-  connection->m_host = host;
+  //  connection->m_host = host;
   return connection;
 }
 
 UnixServerConnection::open()
 {
   boost::asio::stream_protocol::endpoint(m_host);
-  socket_.async_connect(endpoint, std::bind(&UnixConnection::handle_connect, this, std::placeholders::_1));
+  socket_.async_connect(endpoint, std::bind(&UnixServerConnection::handle_connect, this, std::placeholders::_1));
 }
 
 void UnixServerConnection::handle_connect(const boost::system::error_code& error)
 {
   if (!error)
     {
-      LOG_E("Connected to the server!" );
+      std::cout << "Connected to the server!" << std::endl;
       std::string message = "Hello, Server!";
       boost::asio::async_write(*socket_, boost::asio::buffer(message.c_str(), message.size()),
-			       std::bind(&UnixConnection::handle_write, this,
+			       std::bind(&UnixServerConnection::handle_write, this,
 					 std::placeholders::_1, std::placeholders::_2));
     }
   else
     {
-      LOG_E( "Connection error: " << error.message() );
+      std::cout << "Connection error: " << error.message() << std::endl;
     }
 }
 
 void UnixServerConnection::handle_write(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
+  char buffer[1024];
   if (!error)
     {
-      LOG_I("Message sent!");
+      std::cout << "Message sent!" << std::endl;
       socket_->async_read_some(boost::asio::buffer(buffer), std::bind(&UnixConnection::handle_read, this,
 								      std::placeholders::_1, std::placeholders::_2));
     }
   else
     {
-      LOG_E("Write error: " << error.message() );
+      std::cout << "Write error: " << error.message() << std::endl;
     }
 }
 
@@ -63,7 +63,7 @@ void UnixServerConnection::handle_read(const boost::system::error_code& error, s
 {
   if (!error)
     {
-      std::cout << "Received message: " << std::string(buffer.data(), bytes_transferred) << std::endl;
+    //   std::cout << "Received message: " << std::string(buffer.data(), bytes_transferred) << std::endl;
     }
   else
     {

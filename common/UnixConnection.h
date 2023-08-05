@@ -18,12 +18,15 @@ class UnixConnection : public Connection
   static UnixConnection* create(const Url& url, boost::asio::io_context& io_context);
 
   virtual int read(char* buf, int len) { }
-
   virtual int write(char* buf, int len) { }
-  
+
+  boost::asio::local::stream_protocol::socket get_socket();
+
+  bool connect();
+  void async_write(const char* buf, std::size_t len);
+  void async_read();
  private:
   UnixConnection(bool is_stream, boost::asio::io_context& io_context);
-
   PREVENT_COPY(UnixConnection);
 
   boost::asio::local::stream_protocol::socket socket_;

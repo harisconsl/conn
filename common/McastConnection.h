@@ -20,17 +20,18 @@ public:
   static McastConnection* create(const Url& url, boost::asio::io_context& io_context);
 
   virtual int read(char* buf, int len) { }
-
   virtual int write(char* buf, int len) { }
-  
+
+  boost::asio::ip::tcp::socket get_socket();
+
+  void async_read();
 private:
   McastConnection(bool is_stream, boost::asio::io_context& io_context);
   PREVENT_COPY(McastConnection);
 
-  void handle_connect(const boost::system::error_code& ec);
-  
+  void handle_connect(const boost::system::error_code& ec);  
   void handle_recv(const boost::system::error_code& ec, std::size_t bytes_transferred);
-  void do_close();
+  void do_close(){}
 
   boost::asio::ip::udp::socket socket_;
   unsigned short m_port;
