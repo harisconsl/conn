@@ -4,6 +4,7 @@
 #include <functional>
 #include <string.h>
 #include <boost/asio.hpp>
+
 #include "Macros.h"
 #include "Url.h"
 #include "RingBuffer.h"
@@ -44,9 +45,7 @@ public:
 
   virtual int write(char* buf, int len) = 0;
 
-  static bool register_factory();
-
-  
+  static bool register_factory();  
 protected:
   
   std::string m_url;

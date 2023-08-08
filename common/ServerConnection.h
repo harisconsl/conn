@@ -4,8 +4,15 @@
 #include <string.h>
 #include <boost/asio.hpp>
 
+#include "Macros.h"
+#include "RingBuffer.h"
+#include "Url.h"
+
 namespace IN {
 namespace COMMON {
+
+class ConnListener;
+class Packet;
 
 class ServerConnection
 {
@@ -31,30 +38,25 @@ public:
   bool flush();
 
   virtual int read(char* buf, int len) = 0;
-
   virtual int write(char* buf, int len) = 0;
+
+  static bool register_factory();
   
 protected:  
-  boost::asio::io_context& m_io_context;
+  ServerConnection(bool is_stream);
   std::string m_url;
   std::string m_address;
   int m_fd;
 
-  // below
   bool m_verbose;
   bool m_is_stream;
   RingBuffer m_read_buf;
   RingBuffer m_write_buf;
-  
 private:
-  ServerConnection(bool is_stream);
-  static bool register_factory();
+  PREVENT_COPY(ServerConnection);
 
   static bool m_initialized;
-
   static std::map<const std::string, std::function<ServerConnection* (const Url& url, boost::asio::io_context& io_context)>> m_conn_creator;
-
-  PREVENT_COPY(ServerConnection);
 };
  
 }}

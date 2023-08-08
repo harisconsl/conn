@@ -5,21 +5,22 @@
 #include "UnixServerConnection.h"
 #include "Logger.h"
 
-std::map<const std::string, std::function<ServerConnection*(const Url& url, boost::asio::io_context& io_context)>> ServerConnection::m_conn_creator = null;
+using namespace IN::COMMON;
 
-ServerConnection::register_factory();
+std::map<const std::string, std::function<ServerConnection*(const Url& url, boost::asio::io_context& io_context)>> ServerConnection::m_conn_creator;
 
-static ServerConnection* ServerConnection::get_connection(const std::string& url_str, boost::asio::io_context& io_context)
+ServerConnection* ServerConnection::get_connection(const std::string& url_str,
+                                                   boost::asio::io_context& io_context)
 {
   // call get connection function
   Url url(url_str);
-  string type_str = url.get_type_str();
-  auto iter =  m_conn_creator.find(type_str);
+  std::string type_str = url.get_type_str();
 
-  if ( iter = m_conn_creator.end())
+  auto iter =  m_conn_creator.find(type_str);
+  if ( iter != m_conn_creator.end())
     {
       LOG_I("Connection type not found :" << type_str);
-      return null;
+      return nullptr;
     }
   
   return iter->second(url, io_context);

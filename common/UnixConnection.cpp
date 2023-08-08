@@ -2,8 +2,6 @@
 #include "Logger.h"
 
 using namespace IN::COMMON;
-boost::asio::local::stream_protocol stream_protocol;
-boost::asio::io_context io_context;
 
 UnixConnection::UnixConnection(bool is_stream, boost::asio::io_context& io_context)
   : Connection(is_stream)
