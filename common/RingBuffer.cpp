@@ -99,7 +99,6 @@ std::pair<uint8_t* , size_t> RingBuffer::read_buffer()
 {
   uint32_t read_idx = m_read_idx.load(std::memory_order_acquire);
   uint32_t write_idx = m_write_idx.load(std::memory_order_acquire);
-  LOG_I(__func__<< " write_idx : " << write_idx << " read_idx: " <<  read_idx);
   return std::make_pair(m_buf + read_idx, write_idx - read_idx);
 }
 
@@ -113,15 +112,12 @@ std::pair<uint8_t* , size_t> RingBuffer::write_buffer()
       read_idx = m_read_idx.load(std::memory_order_acquire);
       write_idx = m_write_idx.load(std::memory_order_acquire);
     }
-  LOG_I(__func__<< " write_idx : " <<  write_idx << " read_idx: " << read_idx);  
   return std::make_pair(m_buf + write_idx, m_capacity - (write_idx - read_idx));
 }
 
 void RingBuffer::advance_write( uint32_t increment)
 {
   m_write_idx.fetch_add( increment, std::memory_order_release);
-  LOG_I(__func__<< " write_idx : " << m_write_idx << " read_idx: " << m_read_idx);
-
 }
 
 void RingBuffer::advance_read( uint32_t increment)
@@ -136,6 +132,5 @@ void RingBuffer::advance_read( uint32_t increment)
     }
   else
     m_read_idx.fetch_add(increment);
-  LOG_I(__func__<< " write_idx : " << m_write_idx << " read_idx: " << m_read_idx);
 }
 

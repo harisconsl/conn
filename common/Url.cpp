@@ -43,6 +43,8 @@ std::string Url::get_type_str() const
       return std::string("shm");
     case CONN_TYPE::UDP:
       return std::string("udp");
+    case CONN_TYPE::CHRONICLE:
+      return std::string("chr");
     case CONN_TYPE::DEFAULT:
       return std::string("default");
     default:
@@ -78,6 +80,10 @@ bool Url::parse(const std::string& url)
   else if ( type_str == "shm")
     {
       m_type = CONN_TYPE::SHM;
+    }
+  else if ( type_str == "chr")
+    {
+      m_type = CONN_TYPE::CHRONICLE;
     }
   else
     {

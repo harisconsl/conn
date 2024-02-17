@@ -15,6 +15,7 @@ enum class CONN_TYPE
     UNIX,
     SHM,
     UDP,
+    CHRONICLE,
     DEFAULT  
 };
 
@@ -31,6 +32,7 @@ class Url
   //  mcp://233.24.10.1:19601
   //  unix://tmp/mysocket,rbuf=1024
   //  shm://agg_book,size=1024
+  //  chr://tmp/chronicle-file,
   
   Url(const std::string& url);
   
@@ -58,6 +60,8 @@ class Url
 	os << "shm" ; break;
       case CONN_TYPE::UDP:
 	os << "udp" ; break;
+      case CONN_TYPE::CHRONICLE:
+	os << "chr" ; break;
       case CONN_TYPE::DEFAULT:
 	os << "default" ; break;
       default:

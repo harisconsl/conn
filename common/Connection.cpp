@@ -65,6 +65,7 @@ bool Connection::register_factory()
   REG_CONN_FUNC("mcp",  McastConnection::create);
   REG_CONN_FUNC("unix", UnixConnection::create);
   REG_CONN_FUNC("shm",  ShmConnection::create);
+  REG_CONN_FUNC("chr",  ShmConnection::create);
 
   return true;
 }

@@ -6,3 +6,7 @@
 - std error variont
 - quickfix integration
 - code autogeneration using 
+- profiler
+- Binary logging
+- Matcher
+- etc

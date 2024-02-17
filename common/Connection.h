@@ -14,7 +14,7 @@ namespace IN {
 namespace COMMON {
 
 class ConnListener;
-class Packet;
+class NPacket;
 
 class Connection
 {
@@ -35,7 +35,7 @@ public:
  
   bool add_listener(ConnListener* cl);
 
-  bool send_packet(Packet* p);
+  bool send_packet(NPacket* p);
 
   bool recv_packet();
 

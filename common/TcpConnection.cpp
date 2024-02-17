@@ -49,19 +49,14 @@ bool TcpConnection::connect()
 {
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(m_address), m_port);
   socket_.async_connect(endpoint, std::bind(&TcpConnection::handle_connect, this, std::placeholders::_1));
-  LOG_D("Socket connecting to the server!" );
 }
 
 void TcpConnection::handle_connect(const boost::system::error_code& error)
 {
-  LOG_I("handle_connect to the server!" );  
   if (!error)
     {
       LOG_I("Connected to the server!" );
-      // std::string message = "Hello, Server!";
-      // boost::asio::async_write(socket_, boost::asio::buffer(message.c_str(), message.size()),
-      //   		       std::bind(&TcpConnection::handle_write, this, std::placeholders::_1, std::placeholders::_2));
-      //      char buffer[1024];
+
       socket_.async_read_some(boost::asio::buffer(reinterpret_cast<char*>(m_read_buf.write_buffer().first), m_read_buf.write_buffer().second),
                               std::bind(&TcpConnection::handle_read, this, std::placeholders::_1, std::placeholders::_2));
 
@@ -77,8 +72,7 @@ void TcpConnection::handle_write(const boost::system::error_code& error, std::si
   char buffer[1024];
   if (!error)
     {
-      LOG_I("Message sent!");
-      socket_.async_read_some(boost::asio::buffer(buffer), std::bind(&TcpConnection::handle_read, this, std::placeholders::_1, std::placeholders::_2));
+      LOG_D("Message sent!");
     }
   else
     {
@@ -88,21 +82,13 @@ void TcpConnection::handle_write(const boost::system::error_code& error, std::si
 
 void TcpConnection::handle_read(const boost::system::error_code& error, std::size_t bytes_transferred)
 {
-  LOG_I("Message recieved! : " << bytes_transferred);
+  LOG_D("Message recieved! : " << bytes_transferred);
   if (!error)
     {
       LOG_I("Received message: " << std::string(reinterpret_cast<const char*>(m_read_buf.read_buffer().first),
-                                                bytes_transferred) <<"\n");
+                                                bytes_transferred));
       m_read_buf.advance_write(bytes_transferred);
-      LOG_I("address: " << static_cast<void*>(m_read_buf.read_buffer().first));
-      
-      // char buf[128];
-      // unsigned char* msg_buf = reinterpret_cast<unsigned char*>(m_read_buf.read_buffer().first);
-      // for (uint16_t i = 0; i < bytes_transferred; ++i)
-      //   {
-      //     sprintf(&buf[2*i], "%02x", *(msg_buf+i));
-      //   }
-      // LOG_I("Recieved msg => " << buf );
+      LOG_D("address: " << static_cast<void*>(m_read_buf.read_buffer().first));
       m_read_buf.advance_read(bytes_transferred);
       async_read();
     }
@@ -151,7 +137,6 @@ void TcpConnection::async_write(const char* buf, std::size_t len)
 
 void TcpConnection::async_read()
 {
-  LOG_I("address: " << static_cast<void*>(m_read_buf.write_buffer().first));
   auto p = m_read_buf.write_buffer();
   socket_.async_read_some(boost::asio::buffer(reinterpret_cast<char*>(p.first),p.second),
                           std::bind(&TcpConnection::handle_read, this, std::placeholders::_1, std::placeholders::_2));

@@ -1,5 +1,4 @@
 #ifndef _IN_COMMON_RING_BUFFER_H_
-
 #define _IN_COMMON_RING_BUFFER_H_
 
 #include <atomic>

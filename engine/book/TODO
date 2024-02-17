@@ -1,0 +1,7 @@
+1.Config to read various book
+ i. Book level config
+ ii. level by level config
+2. Horizontal and Vertical matching rules
+3. exchange to stream map, whenever a particular market data comes we need to apply those streams
+4. read data from shm/ apply market data to particular streams
+5. snapshot data/ we need to add them horizontally andd vertically at that moment

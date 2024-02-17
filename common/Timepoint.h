@@ -8,60 +8,59 @@
 namespace IN {
 namespace COMMON {
 
-using sc = std::chrono;
+namespace sc = std::chrono;
 boost::posix_time::ptime const ptime_epoch(boost::gregorian::date(1970,1,1));
-
   
 class Timepoint
 {
  public:
   using clock = sc::system_clock;
   using time_point = sc::time_point<clock>;
-  using duration = sc::duration<clock::rep, std::nana>;
+  using duration = sc::duration<clock::rep, std::nano>;
 
- Timepoint(uint64_t ns)
-   : m_nano(ns)
-    { }
-   
- Timepoint(const time_point& tp)
-   : m_nano(sc::duration_cast<duration>(tp.time_since_epoch()).count())
-    { }
-
- Timepoint(const boost::posix_time::ptime& t)
-   : m_nano((t - ptime_epoch).total_nanoseconds())
-    { }
-
- Timepoint(const timespec& ts):
-  m_nano(uint64_t(ts.tv_sec)*1000000000UL + uint64_t(ts.tv_nsec))
-    { }
-
+  explicit Timepoint(uint64_t ns)
+    : m_nano(ns)
+  { }
+  
+  Timepoint(const time_point& tp)
+    : m_nano(sc::duration_cast<duration>(tp.time_since_epoch()).count())
+  { }
+  
+  Timepoint(const boost::posix_time::ptime& t)
+    : m_nano((t - ptime_epoch).total_nanoseconds())
+  { }
+  
+  Timepoint(const timespec& ts)
+    : m_nano(uint64_t(ts.tv_sec)*1000000000UL + uint64_t(ts.tv_nsec))
+  { }
+  
   static Timepoint now()
   {
     return Timepoint(sc::duration_cast<duration>
 		     (clock::now().time_since_epoch()).count());
   }
 
-  uint64_t total_nanoseconds()
+  uint64_t total_nanoseconds() const
   {
     return m_nano;
   }
-
-  uint64_t total_microseconds()
+  
+  uint64_t total_microseconds() const
   {
     return m_nano/1000;
   }
-
-  uint64_t total_milliseconds()
+  
+  uint64_t total_milliseconds() const
   {
     return m_nano/1000000;
   }
 
-  uint64_t total_seconds()
+  uint64_t total_seconds() const
   {
     return m_nano/1000000000;
   }
 
-  uint64_t total_minutes()
+  uint64_t total_minutes() const 
   {
     return m_nano/60000000000;
   }
@@ -81,9 +80,9 @@ class Timepoint
     return m_nano % 1000;
   }
   
-  timepoint chrono_time_point() const
+  Timepoint chrono_time_point() const
   {
-    return timepoint(sc::nanoseconds(m_nano));
+    return Timepoint(m_nano);
   }
 
   Timepoint& operator = (uint64_t ns)
@@ -98,27 +97,27 @@ class Timepoint
     return *this;
   }
 
-  Timepoint& operator == (const Timepoint& tp)
+  bool operator == (const Timepoint& tp)
   {
     return m_nano == tp.m_nano;
   }
 
-  Timepoint& operator < (const Timepoint& tp)
+  bool operator < (const Timepoint& tp)
   {
     return m_nano < tp.m_nano;
   }
 
-  Timepoint& operator <= (const Timepoint& tp)
+  bool operator <= (const Timepoint& tp)
   {
     return m_nano <= tp.m_nano;
   }
 
-  Timepoint& operator > (const Timepoint& tp)
+  bool operator > (const Timepoint& tp)
   {
     return m_nano > tp.m_nano;
   }
 
-  Timepoint& operator >= (const Timepoint& tp)
+  bool operator >= (const Timepoint& tp)
   {
     return m_nano >= tp.m_nano;
   }
@@ -134,7 +133,7 @@ class Timepoint
     time_t time = tp.total_seconds();
     gmtime_r(&time, &t);
     
-    uint32_t nano_sec = tp.nanoseconds();
+    uint32_t nano_sec = tp.total_nanoseconds();
     uint32_t micro_sec = nano_sec/1000; nano_sec -=micro_sec*1000;
     uint32_t milli_sec = micro_sec/1000; micro_sec -=milli_sec*1000;
 
@@ -161,7 +160,7 @@ class Timepoint
     else
       gmtime_r(&time, &t);
 
-    uint32_t nano_sec = tp.nanoseconds();
+    uint32_t nano_sec = total_nanoseconds();
     uint32_t micro_sec = nano_sec/1000; nano_sec -=micro_sec*1000;
     uint32_t milli_sec = micro_sec/1000; micro_sec -=milli_sec*1000;
 
@@ -188,6 +187,10 @@ class Timepoint
     else
       gmtime_r(&time, &t);
 
+    uint32_t nano_sec = total_nanoseconds();
+    uint32_t micro_sec = nano_sec/1000; nano_sec -=micro_sec*1000;
+    uint32_t milli_sec = micro_sec/1000; micro_sec -=milli_sec*1000;
+
     std::stringstream os;
     os << std::setw(4) << std::setfill('0') << (t.tm_year + 1900) << '_'
        << std::setw(2) << std::setfill('0') << (t.tm_mon + 1) << '_'
@@ -195,7 +198,7 @@ class Timepoint
        << std::setw(2) << std::setfill('0') << (t.tm_hour) << '_'
        << std::setw(2) << std::setfill('0') << (t.tm_min) << '_'
        << std::setw(2) << std::setfill('0') << (t.tm_sec) << '_'
-       << std::setw(3) << std::setfill('0') << milli_seconds();
+       << std::setw(3) << std::setfill('0') << milli_sec;
 
     return os.str();    
   }
@@ -218,25 +221,27 @@ class Timepoint
     return os.str();    
   }
 
-  void from_FIX_time(std::istream& is)
+  Timepoint from_FIX_time(std::istream& is)
   {
     std::tm t;
     uint32_t milli_sec = 0;
 
     char ret;
     is >> t.tm_year >> ret >> t.tm_mon >> ret >> t.tm_mday >> ret
-       >> t.tm_hour >> ret >> t.tm_min >> ret >> t.tm_sec >> ret >> milli;
+       >> t.tm_hour >> ret >> t.tm_min >> ret >> t.tm_sec >> ret >> milli_sec;
     
     t.tm_year -= 1900;
     t.tm_mon -= 1;
     time_t time = timegm(&t);
-    m_nano = time * 1000000000LL + micro*1000000LL;
+    m_nano = time * 1000000000LL + milli_sec*1000000LL;
+
+    return Timepoint(1000000000LL*timegm(&t));
   }
 
-  void from_FIX_time_micro(std::istream& is)
+  Timepoint from_FIX_time_micro(std::istream& is)
   {
     std::tm t;
-    uint32_t milli_sec = 0;
+    uint32_t micro = 0;
 
     char ret;
     is >> t.tm_year >> ret >> t.tm_mon >> ret >> t.tm_mday >> ret
@@ -246,9 +251,11 @@ class Timepoint
     t.tm_mon -= 1;
     time_t time = timegm(&t);
     m_nano = time * 1000000000LL + micro*1000LL;
+
+    return Timepoint(1000000000LL*timegm(&t));
   }
 
-  void from_FIX_date(const std::string& date)
+  Timepoint from_FIX_date(const std::string& date)
   {
     std::tm t;
     t.tm_year = std::stoi(date.substr(0,4)) - 1900;

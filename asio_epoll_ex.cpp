@@ -14,7 +14,7 @@ int main()
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string("127.0.0.1"), 8080);
   socket.connect(endpoint);
 
-    // Register the socket's native descriptor with epoll
+  // Register the socket's native descriptor with epoll
   descriptor.assign(socket.native_handle());
   struct epoll_event event;
   event.events = EPOLLIN | EPOLLET;  // Set desired event flags
@@ -31,21 +31,23 @@ int main()
 	{
 	  if (events[i].events & EPOLLIN)
 	    {
-	      if (events[i].data.ptr == nullptr) {
-		// Handle socket event
-		std::array<char, 1024> buffer;
-		boost::system::error_code error;
-		size_t bytes_read = socket.read_some(boost::asio::buffer(buffer), error);
-		if (!error) {
-		  // Process the received data
-		  std::cout << "Received: " << std::string(buffer.data(), bytes_read) << std::endl;
-		}
-		else
-	        {
-		  // Handle read error
-		  std::cerr << "Read error: " << error.message() << std::endl;
-		}
-	      }
+	      if (events[i].data.ptr == nullptr)
+                {
+                  // Handle socket event
+                  std::array<char, 1024> buffer;
+                  boost::system::error_code error;
+                  size_t bytes_read = socket.read_some(boost::asio::buffer(buffer), error);
+                  if (!error)
+                    {
+                      // Process the received data
+                      std::cout << "Received: " << std::string(buffer.data(), bytes_read) << std::endl;
+                    }
+                  else
+                    {
+                      // Handle read error
+                      std::cerr << "Read error: " << error.message() << std::endl;
+                    }
+                }
 	      else
 	      {
 		// Handle other custom events if needed

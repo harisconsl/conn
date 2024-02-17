@@ -1,0 +1,21 @@
+<IN>
+  <stream name="S1" symbol="USD/INR">
+     <exchanges>CCIL,D2,X360T</exchanges>
+     <horizontal>
+       <level_rule level="1" exchanges="CCIL,X360T"/>
+     </horizontal>
+     <vertical>
+        <levels>1000000,3000000,5000000,10000000</levels>
+     </vertical>
+  </stream>
+  <stream name="S2" symbol="USD/INR">
+     <exchanges>D2,CCIL</exchanges>
+     <horizontal>
+       <level_rule level="2" exchanges="CCIL"/>
+     </horizontal>
+     <vertical>
+        <levels>1000000,3000000,5000000,10000000</levels>
+     </vertical>
+  </stream>
+
+</IN>

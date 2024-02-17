@@ -75,13 +75,17 @@ int main()
     {
       Server server(ioContext, port);
       // Start the IO context in a separate thread
-      std::thread ioThread([&ioContext]() {
-	ioContext.run();
-      });
-
+      // std::thread ioThread([&ioContext]() {
+      // while(true)
+      //   {
+      //     ioContext.run_one();  // Run one asynchronous operation
+      //   }
+      // //	ioContext.run();
+      // });
+      ioContext.run();
       std::cout << "Server started on port " << port << std::endl;
       // Wait for the server to finish
-      ioThread.join();
+      //      ioThread.join();
     }
   catch (const std::exception& e)
     {

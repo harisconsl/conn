@@ -26,10 +26,15 @@ inline void trim(std::string &s)
   end_trim(s);
 }
 
-static constexpr double DBL_EPSILON = 1e-9;
-inline bool double_eq(double l , double r){ return std::fabs(l - r) < DBL_EPSILON;}
-inline bool double_le(double l , double r){ return std::fabs(l - r) > DBL_EPSILON && r > l;}   
-inline bool double_gr(double l , double r){ return std::fabs(l - r) > DBL_EPSILON && l > r ;}   
+static constexpr double IN_DBL_EPSILON = 1e-9;
+inline bool double_eq(double l , double r){ return std::fabs(l - r) < IN_DBL_EPSILON;}
+inline bool double_le(double l , double r){ return std::fabs(l - r) > IN_DBL_EPSILON && r > l;}   
+inline bool double_gr(double l , double r){ return std::fabs(l - r) > IN_DBL_EPSILON && l > r ;}   
+
+
+inline bool double_eq(double l , double r, double epsilon){ return std::fabs(l - r) < epsilon;}
+inline bool double_le(double l , double r, double epsilon){ return std::fabs(l - r) > epsilon && r > l;}
+inline bool double_gr(double l , double r, double epsilon){ return std::fabs(l - r) > epsilon && l > r ;}
 
 static const std::string GEN("*");
 
@@ -70,6 +75,16 @@ bool equals(T&& T1, T&& T2, Args&&... args)
     return false;
 
   return equals(args...);
+}
+
+inline uint32_t  next_power_2( uint32_t  x)
+{
+  uint32_t value = 1 ;
+  while(value <= x)
+    {
+      value = value << 1 ;
+    }
+  return value ;
 }
 
 

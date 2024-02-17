@@ -24,7 +24,6 @@ int main()
   std::string message = "hello";      
   while(true)
     {
-      LOG_I("Inside while loop");
       sleep(1);
       std::getline(std::cin, message);
       LOG_I("sending.. " <<  message);
