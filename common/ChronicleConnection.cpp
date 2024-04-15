@@ -9,7 +9,6 @@ ChronicleConnection::ChronicleConnection(bool is_stream, boost::asio::io_context
   : Connection(is_stream)
 { }
 
-
 ChronicleConnection* ChronicleConnection::create(const Url& url, boost::asio::io_context& io_context)
 { 
   std::string host = url.get_address();
@@ -20,12 +19,10 @@ ChronicleConnection* ChronicleConnection::create(const Url& url, boost::asio::io
     }
 
   ChronicleConnection* connection = new ChronicleConnection(true, io_context);
-
   // intialize the private memeberiof the class
   connection->m_address = host;
   return connection;
 }
-
 
 int ChronicleConnection::open()
 {
@@ -38,7 +35,6 @@ int ChronicleConnection::open()
   */
   return 0;
 }
-
 
 int get_fd()
 {

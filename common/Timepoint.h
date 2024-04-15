@@ -13,7 +13,7 @@ boost::posix_time::ptime const ptime_epoch(boost::gregorian::date(1970,1,1));
   
 class Timepoint
 {
- public:
+public:
   using clock = sc::system_clock;
   using time_point = sc::time_point<clock>;
   using duration = sc::duration<clock::rep, std::nano>;
@@ -265,7 +265,7 @@ class Timepoint
     return Timepoint(1000000000LL*timegm(&t));
   }
   
- private:
+private:
   uint64_t m_nano;
 };
 

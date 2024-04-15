@@ -87,6 +87,28 @@ inline uint32_t  next_power_2( uint32_t  x)
   return value ;
 }
 
+template <typename T>
+void insertion_sort(T *arr, size_t len)
+{
+  T key;
+  int i, j;
+  for (i = 1; i < len; i++)
+  {
+    key = arr[i];
+    j = i - 1;
+
+    // Move elements of arr[0..i-1],
+    // that are greater than key,
+    // to one position ahead of their
+    // current position
+    while (j >= 0 && arr[j] > key)
+    {
+      arr[j + 1] = arr[j];
+      j = j - 1;
+    }
+    arr[j + 1] = key;
+  }
+}
 
 #define SC_PAGE_UP(x)   ({                                   \
       const __typeof__(x) ps = sysconf(_SC_PAGE_SIZE);       \

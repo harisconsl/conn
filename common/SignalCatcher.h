@@ -6,16 +6,16 @@
 namespace IN {
 namespace COMMON {
 
-class SignalCatcher {
+class SignalCatcher
+{
 public:
   static SignalCatcher& get_instance();
-
+  
   SignalCatcher();
   ~SignalCatcher();
 
   void handle_signal(int signal);
   void set_callback(std::function<void(int)> callback);
-
 private:
   std::function<void(int)> m_callback;
 };

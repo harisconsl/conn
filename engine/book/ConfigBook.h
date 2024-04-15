@@ -3,7 +3,10 @@
 
 #include <map>
 #include <vector>
+#include <algorithm>
+
 #include "Exchange.h"
+#include "StreamConfig.h"
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
@@ -17,22 +20,6 @@ using boost::property_tree::xml_parser::trim_whitespace;
 
 namespace IN {
 namespace ENGINE {
-
-struct StreamConfig
-{
-  struct LevelRule
-  {
-    int level;
-    std::vector<EXCHANGE> level_exch_vec;
-  };
-
-  std::string stream_name;
-  std::string symbol;
-  std::vector<EXCHANGE> exch_vec;
-  std::vector<int64_t> level_vec;
-  std::map<int,LevelRule> rule_map;
-};
-
 class ConfigBook
 {
 public:
@@ -58,8 +45,8 @@ public:
             sc.stream_name = s->second.get <string> ("<xmlattr>.name");
             sc.symbol = s->second.get <string> ("<xmlattr>.symbol");
             
-            auto exchanges = s->second.get<string>("exchanges");
-            // split the string
+            // primary exchanges
+            auto exchanges = s->second.get<string>("primary_exchanges");
             int pos = 0;
             std::size_t found = exchanges.find(',', pos);
             while (found != std::string::npos)
@@ -67,18 +54,84 @@ public:
                 try
                   {
                     std::string exch_name = exchanges.substr(pos, found - pos);
-                    sc.exch_vec.push_back(str2ex(exch_name));
+                    sc.primary_exch_vec.push_back(str2ex(exch_name));
                   }
                 catch (const boost::bad_lexical_cast &e)
                   {
-                    throw std::invalid_argument("exchanges array is not correct");
+                    throw std::invalid_argument("primary exchanges array is not correct");
                   }
                 pos = found + 1;
                 found = exchanges.find(',', pos);
               }
             // last one without comma
             std::string exch_name = exchanges.substr(pos);
-            sc.exch_vec.push_back(str2ex(exch_name));
+            sc.primary_exch_vec.push_back(str2ex(exch_name));
+
+            // secondary exchange order book
+            exchanges = s->second.get<string>("secondary_exchanges_order_book");
+            pos = 0;
+            found = exchanges.find(',', pos);
+            while (found != std::string::npos)
+              {
+                try
+                  {
+                    std::string exch_name = exchanges.substr(pos, found - pos);
+                    sc.secondary_exch_vec.push_back(str2ex(exch_name));
+                  }
+                catch (const boost::bad_lexical_cast &e)
+                  {
+                    throw std::invalid_argument("secondary exchanges orderbook array is not correct");
+                  }
+                pos = found + 1;
+                found = exchanges.find(',', pos);
+              }
+            // last one without comma
+            exch_name = exchanges.substr(pos);
+            sc.secondary_exch_vec.push_back(str2ex(exch_name));
+
+            // secondary exchange quote book fullamount
+            exchanges = s->second.get<string>("secondary_exchanges_quote_book_fullamount");
+            pos = 0;
+            found = exchanges.find(',', pos);
+            while (found != std::string::npos)
+              {
+                try
+                  {
+                    std::string exch_name = exchanges.substr(pos, found - pos);
+                    sc.secondary_exch_fullamount_vec.push_back(str2ex(exch_name));
+                  }
+                catch (const boost::bad_lexical_cast &e)
+                  {
+                    throw std::invalid_argument("secondary exchanges orderbook array is not correct");
+                  }
+                pos = found + 1;
+                found = exchanges.find(',', pos);
+              }
+            // last one without comma
+            exch_name = exchanges.substr(pos);
+            sc.secondary_exch_fullamount_vec.push_back(str2ex(exch_name));
+
+            // secondary exchange quote book sweepable
+            exchanges = s->second.get<string>("secondary_exchanges_quote_book_sweepable");
+            pos = 0;
+            found = exchanges.find(',', pos);
+            while (found != std::string::npos)
+              {
+                try
+                  {
+                    std::string exch_name = exchanges.substr(pos, found - pos);
+                    sc.secondary_exch_sweepable_vec.push_back(str2ex(exch_name));
+                  }
+                catch (const boost::bad_lexical_cast &e)
+                  {
+                    throw std::invalid_argument("secondary exchanges orderbook array is not correct");
+                  }
+                pos = found + 1;
+                found = exchanges.find(',', pos);
+              }
+            // last one without comma
+            exch_name = exchanges.substr(pos);
+            sc.secondary_exch_sweepable_vec.push_back(str2ex(exch_name));
 
             auto hrules = s->second.get_child("horizontal");          
             for (auto& hr : hrules)
@@ -91,7 +144,7 @@ public:
 
                 StreamConfig::LevelRule lr;
                 lr.level = boost::lexical_cast<int>(hr.second.get<std::string>("<xmlattr>.level"));
-                std::string in_exchanges = hr.second.get<std::string>("<xmlattr>.exchanges");
+                std::string in_exchanges = hr.second.get<std::string>("<xmlattr>.primary_exchanges");
                 int pos = 0;
                 std::size_t found = in_exchanges.find(',', pos);
                 while (found != std::string::npos)
@@ -129,6 +182,7 @@ public:
             int i = boost::lexical_cast<int>(levels.substr(pos));
             sc.level_vec.push_back(i);
 
+            std::sort(sc.level_vec.begin(), sc.level_vec.end());
             str_cfg.insert(std::pair<std::string,StreamConfig>(sc.stream_name,sc));
           }
         
@@ -146,14 +200,30 @@ public:
       {
         LOG_I( "name :" << it.second.stream_name);
         LOG_I( "symbol :" << it.second.symbol);
-        for (auto& it_vec : it.second.exch_vec)
+        for (auto& it_vec : it.second.primary_exch_vec)
           {
-            LOG_I("exchange :" << ex2str(it_vec));
+            LOG_I("primary exchange :" << ex2str(it_vec));
           }
+
+        for (auto& it_vec : it.second.secondary_exch_vec)
+          {
+            LOG_I("secondary exchange :" << ex2str(it_vec));
+          }
+
+        for (auto& it_vec : it.second.secondary_exch_fullamount_vec)
+          {
+            LOG_I("secondary exchange quote fullamount :" << ex2str(it_vec));
+          }
+        for (auto& it_vec : it.second.secondary_exch_sweepable_vec)
+          {
+            LOG_I("secondary exchange quote sweepable :" << ex2str(it_vec));
+          }
+
         for (auto& it_vec : it.second.level_vec)
           {
             LOG_I("size :" << it_vec);        
           }
+
         for (auto& it_map : it.second.rule_map)
           {
             LOG_I("level :" << it_map.second.level);

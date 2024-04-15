@@ -15,7 +15,6 @@ struct SeqPacket
   SeqPacket(): m_ts(0), m_ptr(nullptr) { }
 
   SeqPacket(uint64_t ts, T* ptr) : m_ts(ts), m_ptr(ptr) { }
-
   // Parameterized constructor
   SeqPacket(uint64_t ts, std::unique_ptr<T>& ptr) : m_ts(ts), m_ptr(std::move(ptr)) { }
 
@@ -36,7 +35,8 @@ struct SeqPacket
   // }
 
   // Move assignment operator
-  SeqPacket& operator=(SeqPacket&& other) noexcept {
+  SeqPacket& operator=(SeqPacket&& other) noexcept
+  {
     if (this != &other) {
       // Perform member-wise move assignment
       m_ts = std::move(other.m_ts);
@@ -48,7 +48,6 @@ struct SeqPacket
   uint64_t m_ts;
   std::unique_ptr<T> m_ptr;
 };
-
 
 template <typename T, std::size_t N>
 class CircularBuffer
@@ -75,7 +74,7 @@ public:
   std::optional<T> find( uint64_t timestamp)
   {
     
-    for (int i = 0 ; i < m_write_index ; ++i)
+    for (int i = 0 ;i < m_write_index ;++i)
       {
         if (timestamp == m_array[i].m_ts)
           return std::move(m_array[i]);

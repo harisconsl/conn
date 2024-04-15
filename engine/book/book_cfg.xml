@@ -1,17 +1,23 @@
 <IN>
   <stream name="S1" symbol="USD/INR">
-     <exchanges>CCIL,D2,X360T</exchanges>
+     <primary_exchanges>CCIL,D2,EBS</primary_exchanges>
+     <secondary_exchanges_order_book></secondary_exchanges_order_book>
+     <secondary_exchanges_quote_book_fullamount></secondary_exchanges_quote_book_fullamount>
+     <secondary_exchanges_quote_book_sweepable></secondary_exchanges_quote_book_sweepable>
      <horizontal>
-       <level_rule level="1" exchanges="CCIL,X360T"/>
+       <level_rule level="1" primary_exchanges="CCIL,D2" secondary_exchanges_order_book="CITIBANK" />
      </horizontal>
      <vertical>
         <levels>1000000,3000000,5000000,10000000</levels>
      </vertical>
   </stream>
   <stream name="S2" symbol="USD/INR">
-     <exchanges>D2,CCIL</exchanges>
+     <primary_exchanges>CCIL,D2,X360T</primary_exchanges>
+     <secondary_exchanges_order_book></secondary_exchanges_order_book>
+     <secondary_exchanges_quote_book_fullamount></secondary_exchanges_quote_book_fullamount>
+     <secondary_exchanges_quote_book_sweepable></secondary_exchanges_quote_book_sweepable>
      <horizontal>
-       <level_rule level="2" exchanges="CCIL"/>
+       <level_rule level="2" primary_exchanges="CCIL"/>
      </horizontal>
      <vertical>
         <levels>1000000,3000000,5000000,10000000</levels>

@@ -10,7 +10,7 @@
 namespace IN{
 namespace ENGINE{
 
-static constexpr int MAX_DEPTH = 10;
+static constexpr int MAX_DEPTH = 20;
 
 enum class SnapshotType
 {
@@ -61,6 +61,9 @@ struct L2SnapshotLite
   FXBookType fxbook_type;
   std::array<Level, MAX_DEPTH> bid;
   std::array<Level, MAX_DEPTH> ask;
+
+  uint64_t bid_count;
+  uint64_t ask_count;
   
   int64_t seq_num;
   int64_t recv_time;
